@@ -1,0 +1,235 @@
+import time  # To simulate a delay during payment
+
+
+# Class to represent a single flight
+class FlightNode:
+    def _init_(self, flight_name, starting_point, destination, seats, cost_per_seat):
+        self.flight_name = flight_name
+        self.starting_point = starting_point
+        self.destination = destination
+        self.seats = seats
+        self.cost_per_seat = cost_per_seat
+        self.booked = {}
+        self.next = None
+
+
+# Class to manage the list of flights and bookings
+class Flight:
+    def _init_(self):
+        self.head = None  # This points to the first flight in the list (linked list)
+
+    # Function to add a new flight
+    def add(self, flight_name, starting_point, destination, seats, cost_per_seat):
+        new_flight = FlightNode(flight_name, starting_point, destination, seats, cost_per_seat)
+        if self.head is None:
+            self.head = new_flight  # If no flights exist, add the first one
+        else:
+            temp = self.head
+            while temp.next:  # Go to the last flight in the list
+                temp = temp.next
+            temp.next = new_flight  # Link the new flight at the end of the list
+
+    # Function to book a flight
+    def book(self):
+        if self.head is None:
+            print("No flights available for booking.")
+            return
+        flight_name = input("Enter the flight name you would like to book: ").strip()
+
+        temp = self.head
+        while temp:
+            if flight_name.lower() == temp.flight_name.lower():  # Search for the flight
+                name = input("Enter your name: ").strip()
+                try:
+                    seats = int(input("How many seats would you like to book? ").strip())
+                except ValueError:
+                    print("Invalid input! Please enter a valid number of seats.")
+                    return
+                if seats > temp.seats:
+                    print(f"Only {temp.seats} seats are available.")
+                else:
+                    total_cost = seats * temp.cost_per_seat  # Calculate total cost
+                    print(f"Total cost for {seats} seat(s) is: ₹{total_cost}")
+
+             
+                    print("\nPayment Options:")
+                    print("1. Phone")
+                    print("2. Paytm")
+                    print("3. GPay")
+                    print("4. Credit")
+                    try:
+                        payment_choice = int(input("Choose your payment method (1-4): ").strip())
+                    except ValueError:
+                        print("Invalid input! Please choose a valid option.")
+                        return
+
+                    # Handle payment option
+                    if payment_choice == 1:
+                        print(f"Payment request of ₹{total_cost} sent to your Phone number.")
+                    elif payment_choice == 2:
+                        print(f"Payment request of ₹{total_cost} sent to your Paytm account.")
+                    elif payment_choice == 3:
+                        print(f"Payment request of ₹{total_cost} sent to your GPay account.")
+                    elif payment_choice == 4:
+                        print(f"Payment request of ₹{total_cost} sent to your Credit card.")
+                    else:
+                        print("Invalid payment choice. Booking cancelled.")
+                        return
+
+                    # Simulate payment processing time
+                    time.sleep(4)
+                    print("Booking successful!")
+                    temp.seats -= seats  # Deduct booked seats from available ones
+                    temp.booked[name] = seats  # Add booking to the flight
+                return
+            temp = temp.next
+        print("Flight not found.")
+
+    # Function to cancel a booking
+    def cancel(self):
+        if self.head is None:
+            print("No flights have been added yet.")
+            return
+        flight_name = input("Enter the flight name you booked: ").strip()
+
+        temp = self.head
+        while temp:
+            if flight_name.lower() == temp.flight_name.lower():  # Search for the flight
+                name = input("Enter your name: ").strip()
+                if name in temp.booked:  # Check if the user has booked this flight
+                    print(f"You booked {temp.booked[name]} seats.")
+                    confirm = input("Do you want to cancel your booking? (Y/N): ").strip().upper()
+                    if confirm == 'Y':
+                        temp.seats += temp.booked[name]  # Add canceled seats back to available seats
+                        del temp.booked[name]  # Remove the booking
+                        print("Booking canceled.")
+                    else:
+                        print("Cancellation aborted.")
+                    return
+                else:
+                    print("Booking not found under this name.")
+                    return
+            temp = temp.next
+        print("Flight not found.")
+
+    # Function to delete a flight (admin only)
+    def delete(self):
+        if self.head is None:
+            print("No flights have been added yet.")
+            return
+        flight_name = input("Enter the flight name to delete: ").strip()
+
+        temp = self.head
+        prev = None
+        while temp:
+            if temp.flight_name.lower() == flight_name.lower():  # Search for the flight
+                if prev is None:  # If the flight to delete is the first one
+                    self.head = temp.next
+                else:
+                    prev.next = temp.next  # Remove the flight by skipping over it
+                print(f"Flight '{flight_name}' deleted successfully.")
+                return
+            prev = temp
+            temp = temp.next
+        print("Flight not found.")
+
+    # Function to display all available flights
+    def display(self):
+        if self.head is None:
+            print("No flights available.")
+            return
+        temp = self.head
+        while temp:
+            print(f"Flight: {temp.flight_name}, From: {temp.starting_point}, To: {temp.destination}, "
+                  f"Seats Available: {temp.seats}, Cost per Seat: ₹{temp.cost_per_seat}")
+            temp = temp.next
+
+
+# Function to handle admin login (simple username/password check)
+def admin_login():
+    logininfo = {
+        "admin": "123456"
+    }
+    username = input("Enter admin username: ").strip()
+    password = input("Enter admin password: ").strip()
+    if username in logininfo and password == logininfo[username]:
+        print("Access granted. Welcome, Admin.")
+        return True
+    else:
+        print("Invalid login. Access denied.")
+        return False
+
+
+# Main function to run the flight reservation system
+def main():
+    airlines = Flight()
+
+
+    airlines.add("Flight101", "DELHI", "MUMBAI", 150, 5000)
+    airlines.add("Flight202", "CHENNAI", "KOLKATA", 120, 3500)
+    airlines.add("Flight303", "MUMBAI", "DELHI", 200, 4000)
+    airlines.add("Flight404", "KOLKATA", "CHENNAI", 100, 3000)
+
+    while True:
+        print("\n--- Welcome to the Flight Reservation System ---")
+        print("1. Book Tickets")
+        print("2. Display Flights")
+        print("3. Cancel Tickets")
+        print("4. Admin Panel")
+        print("5. Exit")
+
+        try:
+            choice = int(input("Please enter your choice: ").strip())
+        except ValueError:
+            print("Invalid input! Please enter a number.")
+            continue
+
+        if choice == 1:
+            airlines.display()
+            airlines.book()
+        elif choice == 2:
+            airlines.display()
+        elif choice == 3:
+            airlines.cancel()
+        elif choice == 4:
+            if admin_login():
+                while True:
+                    print("\nAdmin Panel:")
+                    print("1. Add a Flight")
+                    print("2. Delete a Flight")
+                    print("3. Exit Admin Panel")
+                    try:
+                        admin_choice = int(input("Enter your choice: ").strip())
+                    except ValueError:
+                        print("Invalid input! Please enter a number.")
+                        continue
+
+                    if admin_choice == 1:
+                        flight_name = input("Enter flight name: ").strip()
+                        starting_point = input("Enter starting point: ").strip()
+                        destination = input("Enter destination: ").strip()
+                        try:
+                            seats = int(input("Enter number of seats: ").strip())
+                            cost_per_seat = int(input("Enter cost per seat: ").strip())
+                        except ValueError:
+                            print("Invalid input! Please enter a valid number.")
+                            continue
+                        airlines.add(flight_name, starting_point, destination, seats, cost_per_seat)
+                        print("Flight added successfully.")
+                    elif admin_choice == 2:
+                        airlines.delete()
+                    elif admin_choice == 3:
+                        break
+                    else:
+                        print("Invalid option, please try again.")
+            else:
+                print("Admin access required.")
+        elif choice == 5:
+            print("Thank you for using the system. Bye!")
+            break
+        else:
+            print("Invalid option! Please try again.")
+
+            # Start the program
+if _name_ == "_main_":
+    main()
