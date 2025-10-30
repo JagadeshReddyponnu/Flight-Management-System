@@ -1,0 +1,27 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env/
+
+# Streamlit cache
+.streamlit/
+
+# Data files (local)
+data/bookings.csv
+data/waitlist.csv
+
+# Generated tickets
+tickets/
+
+# OS junk files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.log
+*.tmp
